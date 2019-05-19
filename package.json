@@ -1,5 +1,5 @@
 {
-  "name": "file-handling",
+  "name": "file-storage",
   "version": "1.0.0",
   "description": "Simple file upload and storage API",
   "main": "server.js",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/osu-cs493-sp19/file-handling.git"
+    "url": "git+https://github.com/osu-cs493-sp19/file-storage.git"
   },
   "keywords": [],
   "author": "Hess <hessro@oregonstate.edu>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/osu-cs493-sp19/file-handling/issues"
+    "url": "https://github.com/osu-cs493-sp19/file-storage/issues"
   },
-  "homepage": "https://github.com/osu-cs493-sp19/file-handling#readme",
+  "homepage": "https://github.com/osu-cs493-sp19/file-storage#readme",
   "dependencies": {
     "express": "^4.16.4",
     "mongodb": "^3.2.4"
