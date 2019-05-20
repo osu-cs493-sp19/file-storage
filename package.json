@@ -21,7 +21,8 @@
   "homepage": "https://github.com/osu-cs493-sp19/file-storage#readme",
   "dependencies": {
     "express": "^4.16.4",
-    "mongodb": "^3.2.4"
+    "mongodb": "^3.2.4",
+    "multer": "^1.4.1"
   },
   "devDependencies": {
     "nodemon": "^1.19.0"
