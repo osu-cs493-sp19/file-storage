@@ -1,9 +1,10 @@
 const express = require('express');
 const multer = require('multer');
 const crypto = require('crypto');
+const fs = require('fs');
 
 const { connectToDB } = require('./lib/mongo');
-const { getImageInfoById, saveImageInfo } = require('./models/image');
+const { getImageInfoById, saveImageInfo, saveImageFile, getDownloadStreamByFilename } = require('./models/image');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -30,6 +31,19 @@ app.get('/', (req, res, next) => {
   res.status(200).sendFile(__dirname + '/index.html');
 });
 
+function removeUploadedFile(file) {
+  return new Promise((resolve, reject) => {
+    fs.unlink(file.path, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+
+}
+
 app.post('/images', upload.single('image'), async (req, res, next) => {
   console.log("== req.file:", req.file);
   console.log("== req.body:", req.body);
@@ -41,7 +55,9 @@ app.post('/images', upload.single('image'), async (req, res, next) => {
         contentType: req.file.mimetype,
         userId: req.body.userId
       };
-      const id = await saveImageInfo(image);
+      // const id = await saveImageInfo(image);
+      const id = await saveImageFile(image);
+      await removeUploadedFile(req.file);
       res.status(200).send({ id: id });
     } catch (err) {
       next(err);
@@ -57,9 +73,15 @@ app.get('/images/:id', async (req, res, next) => {
   try {
     const image = await getImageInfoById(req.params.id);
     if (image) {
-      delete image.path;
-      image.url = `/media/images/${image.filename}`;
-      res.status(200).send(image);
+      // delete image.path;
+      // image.url = `/media/images/${image.filename}`;
+      const responseBody = {
+        _id: image._id,
+        url: `/media/images/${image.filename}`,
+        contentType: image.metadata.contentType,
+        userId: image.metadata.userId
+      };
+      res.status(200).send(responseBody);
     } else {
       next();
     }
@@ -68,7 +90,22 @@ app.get('/images/:id', async (req, res, next) => {
   }
 });
 
-app.use('/media/images', express.static(`${__dirname}/uploads`));
+// app.use('/media/images', express.static(`${__dirname}/uploads`));
+app.get('/media/images/:filename', (req, res, next) => {
+  getDownloadStreamByFilename(req.params.filename)
+    .on('error', (err) => {
+      if (err.code === 'ENOENT') {
+        next();
+      } else {
+        next(err);
+      }
+    })
+    .on('file', (file) => {
+      res.status(200).type(file.metadata.contentType);
+    })
+    .pipe(res);
+});
+
 
 app.use('*', (err, req, res, next) => {
   console.error(err);
